@@ -1,0 +1,1267 @@
+{
+  "datasets": [
+    {
+      "name": "f780eabe",
+      "displayName": "Total Subscribers",
+      "queryLines": [
+        "----------------------------------------------------\r\n",
+        "-- KPI: Total Subscribers\r\n",
+        "----------------------------------------------------\r\n",
+        "SELECT\r\n",
+        "    COUNT(DISTINCT UserID) AS Total_Subscribers\r\n",
+        "FROM retail.default.user_profiles_bright_tv_dataset;"
+      ]
+    },
+    {
+      "name": "32e7c556",
+      "displayName": "Total Sessions",
+      "queryLines": [
+        "----------------------------------------------------\r\n",
+        "-- KPI: Total Sessions\r\n",
+        "----------------------------------------------------\r\n",
+        "SELECT\r\n",
+        "    COUNT(*) AS Total_Sessions\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset;"
+      ]
+    },
+    {
+      "name": "a18f7573",
+      "displayName": "Active Subscribers",
+      "queryLines": [
+        "----------------------------------------------------\r\n",
+        "-- KPI: Active Subscribers\r\n",
+        "----------------------------------------------------\r\n",
+        "SELECT\r\n",
+        "    COUNT(DISTINCT COALESCE(UserID0, UserID4)) AS Active_Subscribers\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset;"
+      ]
+    },
+    {
+      "name": "24b66f1a",
+      "displayName": "Inactive Subscribers",
+      "queryLines": [
+        "----------------------------------------------------\r\n",
+        "-- KPI: Inactive Subscribers\r\n",
+        "----------------------------------------------------\r\n",
+        "SELECT\r\n",
+        "    COUNT(DISTINCT u.UserID) AS Inactive_Subscribers\r\n",
+        "FROM retail.default.user_profiles_bright_tv_dataset u\r\n",
+        "LEFT JOIN retail.default.viewership_bright_tv_dataset v\r\n",
+        "    ON u.UserID = COALESCE(v.UserID0, v.UserID4)\r\n",
+        "WHERE COALESCE(v.UserID0, v.UserID4) IS NULL;"
+      ]
+    },
+    {
+      "name": "cfddbf0f",
+      "displayName": "Avg Sessions per Subscriber",
+      "queryLines": [
+        "----------------------------------------------------\r\n",
+        "-- KPI: Average Sessions per Active Subscriber\r\n",
+        "----------------------------------------------------\r\n",
+        "SELECT\r\n",
+        "    ROUND(\r\n",
+        "        COUNT(*) * 1.0 /\r\n",
+        "        COUNT(DISTINCT COALESCE(UserID0, UserID4)),\r\n",
+        "        2\r\n",
+        "    ) AS Avg_Sessions_Per_Subscriber\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset;"
+      ]
+    },
+    {
+      "name": "c4bf27ab",
+      "displayName": "Avg Session Duration (min)",
+      "queryLines": [
+        "----------------------------------------------------\r\n",
+        "-- KPI: Average Session Duration (Minutes)\r\n",
+        "----------------------------------------------------\r\n",
+        "SELECT\r\n",
+        "    ROUND(\r\n",
+        "        AVG(\r\n",
+        "            HOUR(`Duration 2`) * 60 +\r\n",
+        "            MINUTE(`Duration 2`) +\r\n",
+        "            SECOND(`Duration 2`) / 60.0\r\n",
+        "        ),\r\n",
+        "        2\r\n",
+        "    ) AS Avg_Session_Duration_Minutes\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset;"
+      ]
+    },
+    {
+      "name": "03b7bf05",
+      "displayName": "Total Watch Time (min)",
+      "queryLines": [
+        "----------------------------------------------------\r\n",
+        "-- KPI: Total Watch Time (Minutes)\r\n",
+        "----------------------------------------------------\r\n",
+        "SELECT\r\n",
+        "    ROUND(\r\n",
+        "        SUM(\r\n",
+        "            HOUR(`Duration 2`) * 60 +\r\n",
+        "            MINUTE(`Duration 2`) +\r\n",
+        "            SECOND(`Duration 2`) / 60.0\r\n",
+        "        ),\r\n",
+        "        2\r\n",
+        "    ) AS Total_Watch_Time_Minutes\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset;"
+      ]
+    },
+    {
+      "name": "30dabaf6",
+      "displayName": "Sessions by Day of Week",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "-- Dashboard: Sessions by Day of Week\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "    DATE_FORMAT(RecordDate2 + INTERVAL 2 HOURS,'E') AS Day_Name,\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset\r\n",
+        "GROUP BY\r\n",
+        "    DAYOFWEEK(RecordDate2 + INTERVAL 2 HOURS),\r\n",
+        "    DATE_FORMAT(RecordDate2 + INTERVAL 2 HOURS,'E')\r\n",
+        "ORDER BY\r\n",
+        "    DAYOFWEEK(RecordDate2 + INTERVAL 2 HOURS);"
+      ]
+    },
+    {
+      "name": "59a64920",
+      "displayName": "Session By Hour of Day",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "-- Dashboard: Sessions by Hour of Day\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "    HOUR(RecordDate2 + INTERVAL 2 HOURS) AS Hour_Of_Day,\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset\r\n",
+        "GROUP BY\r\n",
+        "    HOUR(RecordDate2 + INTERVAL 2 HOURS)\r\n",
+        "ORDER BY\r\n",
+        "    Hour_Of_Day;"
+      ]
+    },
+    {
+      "name": "10dbb1f4",
+      "displayName": "Monthly Bright TV Viewership Sessions Summary",
+      "queryLines": [
+        "\r\n",
+        "SELECT\r\n",
+        "    DATE_FORMAT(RecordDate2 + INTERVAL 2 HOURS,'yyyyMM') AS Month_ID,\r\n",
+        "    MONTHNAME(RecordDate2 + INTERVAL 2 HOURS) AS Month_Name,\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset\r\n",
+        "GROUP BY\r\n",
+        "    DATE_FORMAT(RecordDate2 + INTERVAL 2 HOURS,'yyyyMM'),\r\n",
+        "    MONTHNAME(RecordDate2 + INTERVAL 2 HOURS)\r\n",
+        "ORDER BY\r\n",
+        "    Month_ID;"
+      ]
+    },
+    {
+      "name": "be44898e",
+      "displayName": "Top 10 TV Channels",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "-- Dashboard: Top 10 TV Channels\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "\r\n",
+        "    CASE\r\n",
+        "        WHEN LOWER(Channel2) = 'sawsee' THEN 'SawSee'\r\n",
+        "        WHEN Channel2 IN\r\n",
+        "        (\r\n",
+        "            'Supersport Live Events',\r\n",
+        "            'SuperSport Live Events',\r\n",
+        "            'Live on SuperSport'\r\n",
+        "        )\r\n",
+        "        THEN 'SuperSport Live Events'\r\n",
+        "        ELSE Channel2\r\n",
+        "    END AS Tv_Channel,\r\n",
+        "\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset\r\n",
+        "\r\n",
+        "GROUP BY\r\n",
+        "\r\n",
+        "    CASE\r\n",
+        "        WHEN LOWER(Channel2) = 'sawsee' THEN 'SawSee'\r\n",
+        "        WHEN Channel2 IN\r\n",
+        "        (\r\n",
+        "            'Supersport Live Events',\r\n",
+        "            'SuperSport Live Events',\r\n",
+        "            'Live on SuperSport'\r\n",
+        "        )\r\n",
+        "        THEN 'SuperSport Live Events'\r\n",
+        "        ELSE Channel2\r\n",
+        "    END\r\n",
+        "\r\n",
+        "ORDER BY Session_Count DESC\r\n",
+        "\r\n",
+        "LIMIT 10;"
+      ]
+    },
+    {
+      "name": "efed2244",
+      "displayName": "Channel Viewing Patterns by Category Summary",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "-- Dashboard: Channel Category Split\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "\r\n",
+        "    CASE\r\n",
+        "        WHEN Channel2 LIKE '%SuperSport%' THEN 'Sports'\r\n",
+        "        WHEN Channel2 IN ('Cartoon Network','Boomerang') THEN 'Kids'\r\n",
+        "        WHEN Channel2 = 'CNN' THEN 'News'\r\n",
+        "        ELSE 'Entertainment'\r\n",
+        "    END AS Channel_Category,\r\n",
+        "\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset\r\n",
+        "\r\n",
+        "GROUP BY\r\n",
+        "\r\n",
+        "    CASE\r\n",
+        "        WHEN Channel2 LIKE '%SuperSport%' THEN 'Sports'\r\n",
+        "        WHEN Channel2 IN ('Cartoon Network','Boomerang') THEN 'Kids'\r\n",
+        "        WHEN Channel2 = 'CNN' THEN 'News'\r\n",
+        "        ELSE 'Entertainment'\r\n",
+        "    END\r\n",
+        "\r\n",
+        "ORDER BY Session_Count DESC;"
+      ]
+    },
+    {
+      "name": "e562bf11",
+      "displayName": "Age Group Session Duration Insights",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "--Average Session Duration by Age Group\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "    CASE\r\n",
+        "        WHEN u.Age = 0 THEN 'Unknown'\r\n",
+        "        WHEN u.Age BETWEEN 1 AND 12 THEN 'Kids'\r\n",
+        "        WHEN u.Age BETWEEN 13 AND 19 THEN 'Teenager'\r\n",
+        "        WHEN u.Age BETWEEN 20 AND 35 THEN 'Youth'\r\n",
+        "        WHEN u.Age BETWEEN 36 AND 50 THEN 'Adult'\r\n",
+        "        WHEN u.Age BETWEEN 51 AND 65 THEN 'Elder'\r\n",
+        "        ELSE 'Pensioner'\r\n",
+        "    END AS Age_Group,\r\n",
+        "\r\n",
+        "    ROUND(\r\n",
+        "        AVG(\r\n",
+        "            HOUR(v.`Duration 2`) * 60 +\r\n",
+        "            MINUTE(v.`Duration 2`) +\r\n",
+        "            SECOND(v.`Duration 2`) / 60.0\r\n",
+        "        ),\r\n",
+        "        2\r\n",
+        "    ) AS Avg_Duration_Minutes\r\n",
+        "\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset v\r\n",
+        "\r\n",
+        "LEFT JOIN retail.default.user_profiles_bright_tv_dataset u\r\n",
+        "    ON COALESCE(v.UserID0, v.UserID4) = u.UserID\r\n",
+        "\r\n",
+        "GROUP BY\r\n",
+        "    CASE\r\n",
+        "        WHEN u.Age = 0 THEN 'Unknown'\r\n",
+        "        WHEN u.Age BETWEEN 1 AND 12 THEN 'Kids'\r\n",
+        "        WHEN u.Age BETWEEN 13 AND 19 THEN 'Teenager'\r\n",
+        "        WHEN u.Age BETWEEN 20 AND 35 THEN 'Youth'\r\n",
+        "        WHEN u.Age BETWEEN 36 AND 50 THEN 'Adult'\r\n",
+        "        WHEN u.Age BETWEEN 51 AND 65 THEN 'Elder'\r\n",
+        "        ELSE 'Pensioner'\r\n",
+        "    END\r\n",
+        "\r\n",
+        "ORDER BY Avg_Duration_Minutes DESC;"
+      ]
+    },
+    {
+      "name": "ef157efc",
+      "displayName": "Gender Session Insights Report",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "--Sessions by Gender\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "    CASE\r\n",
+        "        WHEN u.Gender IS NULL OR TRIM(u.Gender) = '' OR u.Gender = 'None'\r\n",
+        "        THEN 'Unknown'\r\n",
+        "        ELSE u.Gender\r\n",
+        "    END AS Gender,\r\n",
+        "\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset v\r\n",
+        "\r\n",
+        "LEFT JOIN retail.default.user_profiles_bright_tv_dataset u\r\n",
+        "    ON COALESCE(v.UserID0, v.UserID4) = u.UserID\r\n",
+        "\r\n",
+        "GROUP BY\r\n",
+        "    CASE\r\n",
+        "        WHEN u.Gender IS NULL OR TRIM(u.Gender) = '' OR u.Gender = 'None'\r\n",
+        "        THEN 'Unknown'\r\n",
+        "        ELSE u.Gender\r\n",
+        "    END\r\n",
+        "\r\n",
+        "ORDER BY Session_Count DESC;"
+      ]
+    },
+    {
+      "name": "20d9fddf",
+      "displayName": "Diversity in Viewing Sessions Analysis",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "-- Sessions by Race\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "    CASE\r\n",
+        "        WHEN u.Race IS NULL OR TRIM(u.Race) = '' OR LOWER(u.Race) = 'other'\r\n",
+        "        THEN 'Unknown'\r\n",
+        "        ELSE u.Race\r\n",
+        "    END AS Race,\r\n",
+        "\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset v\r\n",
+        "\r\n",
+        "LEFT JOIN retail.default.user_profiles_bright_tv_dataset u\r\n",
+        "    ON COALESCE(v.UserID0, v.UserID4) = u.UserID\r\n",
+        "\r\n",
+        "GROUP BY\r\n",
+        "    CASE\r\n",
+        "        WHEN u.Race IS NULL OR TRIM(u.Race) = '' OR LOWER(u.Race) = 'other'\r\n",
+        "        THEN 'Unknown'\r\n",
+        "        ELSE u.Race\r\n",
+        "    END\r\n",
+        "\r\n",
+        "ORDER BY Session_Count DESC;"
+      ]
+    },
+    {
+      "name": "313f3a76",
+      "displayName": "Province-Based Session Overview",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "--  Sessions by Province\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "    CASE\r\n",
+        "        WHEN u.Province IS NULL OR TRIM(u.Province) = '' OR u.Province = 'None'\r\n",
+        "        THEN 'Unknown'\r\n",
+        "        ELSE u.Province\r\n",
+        "    END AS Province,\r\n",
+        "\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset v\r\n",
+        "\r\n",
+        "LEFT JOIN retail.default.user_profiles_bright_tv_dataset u\r\n",
+        "    ON COALESCE(v.UserID0, v.UserID4) = u.UserID\r\n",
+        "\r\n",
+        "GROUP BY\r\n",
+        "    CASE\r\n",
+        "        WHEN u.Province IS NULL OR TRIM(u.Province) = '' OR u.Province = 'None'\r\n",
+        "        THEN 'Unknown'\r\n",
+        "        ELSE u.Province\r\n",
+        "    END\r\n",
+        "\r\n",
+        "ORDER BY Session_Count DESC;"
+      ]
+    },
+    {
+      "name": "2a471359",
+      "displayName": "Weekday vs Weekend",
+      "queryLines": [
+        "--------------------------------------------------------\r\n",
+        "-- Weekday vs Weekend\r\n",
+        "--------------------------------------------------------\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "    CASE\r\n",
+        "        WHEN DATE_FORMAT(v.RecordDate2 + INTERVAL 2 HOURS, 'E') IN ('Sat', 'Sun')\r\n",
+        "        THEN 'Weekend'\r\n",
+        "        ELSE 'Weekday'\r\n",
+        "    END AS Day_Classification,\r\n",
+        "\r\n",
+        "    COUNT(*) AS Session_Count\r\n",
+        "\r\n",
+        "FROM retail.default.viewership_bright_tv_dataset v\r\n",
+        "\r\n",
+        "GROUP BY\r\n",
+        "    CASE\r\n",
+        "        WHEN DATE_FORMAT(v.RecordDate2 + INTERVAL 2 HOURS, 'E') IN ('Sat', 'Sun')\r\n",
+        "        THEN 'Weekend'\r\n",
+        "        ELSE 'Weekday'\r\n",
+        "    END\r\n",
+        "\r\n",
+        "ORDER BY Session_Count DESC;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "df74e504",
+      "displayName": "Bright TV Dashboard101",
+      "layout": [
+        {
+          "widget": {
+            "name": "26f1e06a",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:right;display:block;\"><span style=\"font-size: 18px;\">Bright TV Dashboard</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "t",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f780eabe",
+                  "fields": [
+                    {
+                      "name": "sum(Total_Subscribers)",
+                      "expression": "SUM(`Total_Subscribers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Subscribers"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Total_Subscribers)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "c04e34d2",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "32e7c556",
+                  "fields": [
+                    {
+                      "name": "sum(Total_Sessions)",
+                      "expression": "SUM(`Total_Sessions`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Sessions"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Total_Sessions)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 1,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "1d7bc4d6",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a18f7573",
+                  "fields": [
+                    {
+                      "name": "sum(Active_Subscribers)",
+                      "expression": "SUM(`Active_Subscribers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Active Subscribers"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Active_Subscribers)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "6e375e01",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "24b66f1a",
+                  "fields": [
+                    {
+                      "name": "sum(Inactive_Subscribers)",
+                      "expression": "SUM(`Inactive_Subscribers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Inactive Subscribers"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Inactive_Subscribers)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 1,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "sessions-by-day-of-week",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "30dabaf6",
+                  "fields": [
+                    {
+                      "name": "Day_Name",
+                      "expression": "`Day_Name`"
+                    },
+                    {
+                      "name": "sum(Session_Count)",
+                      "expression": "SUM(`Session_Count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Sessions by Day of Week"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Day_Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Session_Count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "session-by-hour-of-day",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "59a64920",
+                  "fields": [
+                    {
+                      "name": "Hour_Of_Day",
+                      "expression": "`Hour_Of_Day`"
+                    },
+                    {
+                      "name": "sum(Session_Count)",
+                      "expression": "SUM(`Session_Count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Session By Hour of Day"
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "Hour_Of_Day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Session_Count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 3,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "monthly-bright-tv-viewership-sess",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "10dbb1f4",
+                  "fields": [
+                    {
+                      "name": "Month_Name",
+                      "expression": "`Month_Name`"
+                    },
+                    {
+                      "name": "sum(Session_Count)",
+                      "expression": "SUM(`Session_Count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Monthly Viewership Sessions"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Month_Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Session_Count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 5,
+            "width": 4,
+            "height": 14
+          }
+        },
+        {
+          "widget": {
+            "name": "top-10-tv-channels",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "be44898e",
+                  "fields": [
+                    {
+                      "name": "Tv_Channel",
+                      "expression": "`Tv_Channel`"
+                    },
+                    {
+                      "name": "sum(Session_Count)",
+                      "expression": "SUM(`Session_Count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 TV Channels"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Tv_Channel",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Session_Count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "channel-viewing-patterns-by-category",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "efed2244",
+                  "fields": [
+                    {
+                      "name": "countdistinct(Channel_Category)",
+                      "expression": "COUNT(DISTINCT `Channel_Category`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Channel Viewing Patterns by Category"
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "countdistinct(Channel_Category)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "6e90cbcf",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e562bf11",
+                  "fields": [
+                    {
+                      "name": "Age_Group",
+                      "expression": "`Age_Group`"
+                    },
+                    {
+                      "name": "sum(Avg_Duration_Minutes)",
+                      "expression": "SUM(`Avg_Duration_Minutes`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Age_Group",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Avg_Duration_Minutes)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 13,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "d26ccebb",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ef157efc",
+                  "fields": [
+                    {
+                      "name": "sum(Session_Count)",
+                      "expression": "SUM(`Session_Count`)"
+                    },
+                    {
+                      "name": "Gender",
+                      "expression": "`Gender`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(Session_Count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "Gender",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 13,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "5b36bce8",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "20d9fddf",
+                  "fields": [
+                    {
+                      "name": "Race",
+                      "expression": "`Race`"
+                    },
+                    {
+                      "name": "sum(Session_Count)",
+                      "expression": "SUM(`Session_Count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Diversity in Viewing Sessions "
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Race",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Session_Count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 19,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "0ba15546",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "313f3a76",
+                  "fields": [
+                    {
+                      "name": "Province",
+                      "expression": "`Province`"
+                    },
+                    {
+                      "name": "sum(Session_Count)",
+                      "expression": "SUM(`Session_Count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Province-Based Session"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Province",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Session_Count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 20,
+            "width": 8,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "weekday-vs-weekend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "2a471359",
+                  "fields": [
+                    {
+                      "name": "countdistinct(Day_Classification)",
+                      "expression": "COUNT(DISTINCT `Day_Classification`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Weekday vs Weekend"
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "countdistinct(Day_Classification)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 24,
+            "width": 4,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "df7c20ef",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cfddbf0f",
+                  "fields": [
+                    {
+                      "name": "sum(Avg_Sessions_Per_Subscriber)",
+                      "expression": "SUM(`Avg_Sessions_Per_Subscriber`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "AVG Sessions per Sub"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Avg_Sessions_Per_Subscriber)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 1,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "e49cd78d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c4bf27ab",
+                  "fields": [
+                    {
+                      "name": "sum(Avg_Session_Duration_Minutes)",
+                      "expression": "SUM(`Avg_Session_Duration_Minutes`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "AVG Session Duration (min)"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Avg_Session_Duration_Minutes)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 1,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f4f18a8f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "03b7bf05",
+                  "fields": [
+                    {
+                      "name": "sum(Total_Watch_Time_Minutes)",
+                      "expression": "SUM(`Total_Watch_Time_Minutes`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Watch Tim (min)"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Total_Watch_Time_Minutes)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 10,
+            "y": 3,
+            "width": 2,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
